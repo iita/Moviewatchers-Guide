@@ -13,6 +13,8 @@
 
 - Create a repository in github.
 
+- Create the reports with Python
+
 - Make changes, commit them, and push them in your own repository.
 
 - Send us the url where to find the code.
