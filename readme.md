@@ -31,11 +31,13 @@ Submit the following items into your repository:
 - *.py
   - Sumbit your code for generating said reports, metrics and insights.
 
-***Please note the usage license of the data and DO NOT upload the data with your submission.***
+***Please note the usage license of the data and DO NOT upload the data and DO NOT upload the reports with your submission.***
+
+***The reports must be re-generateable from you code!***
 
 ## About the data
 
-This excercise uses the MovieLens 1M Dataset.
+This exercise uses the MovieLens 1M Dataset.
 
 You can find the data from 
 https://grouplens.org/datasets/movielens/1m/
