@@ -23,7 +23,7 @@
 
 Submit the following items into your repository:
 - Readme.md
-   - Your sumbission should contain a readme explaining your choices of selected metrics and technical details.
+   - Your submission should contain a readme explaining your choices of selected metrics and technical details.
 
 - requirements.txt
   - Your dependencies should be provided in pip requirements format.
