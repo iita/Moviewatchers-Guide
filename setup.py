@@ -6,6 +6,7 @@ from io import BytesIO
 import requests as rq
 import pandas as pd
 import pgeocode as pg 
+import plotly.graph_objs as go
 
 #%%
 jtplot.style("monokai")
@@ -45,7 +46,6 @@ users_tbl["isFemale"] = [1 if row=="F" else 0 for row in users_tbl.Gender]
 
 #%%
 nomi = pg.Nominatim("us")
-nomi.query_postal_code(94110).state_name
 
 zip_states = {}
 for z in users_tbl.ZipCode:
@@ -58,7 +58,7 @@ users_tbl["State"] = [zip_states.get(str(row)) for row in users_tbl.ZipCode]
 full_tbl = pd.merge(pd.merge(movies_tbl[["MovieID", "Genres", "ReleaseYear"]], ratings_tbl[["MovieID", "UserID", "Rating", "Year", "Month", "Day", "Weekday", "Time"]], "inner", on="MovieID"), users_tbl[["UserID", "Age", "isFemale", "Occupation", "State"]], "inner", on="UserID") #let's not look at incomplete data since there's very little of it
 
 #%%
-cframe = df.corr()
+cframe = full_tbl.corr()
 fig = go.Figure(data=go.Heatmap(
                    z=cframe.values,
                    x=cframe.columns.values,
