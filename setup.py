@@ -35,6 +35,8 @@ def getdatetype(x, datetype):
         return int(datetime.fromtimestamp(x).strftime("%w"))
     elif datetype=="time":
         return int(datetime.fromtimestamp(x).strftime("%H"))
+    elif datetype=="date":
+        return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
     
 
 ratings_tbl["Year"] = [getdatetype(row, "year") for row in ratings_tbl.Timestamp]
@@ -42,8 +44,19 @@ ratings_tbl["Month"] = [getdatetype(row, "month") for row in ratings_tbl.Timesta
 ratings_tbl["Day"] = [getdatetype(row, "day") for row in ratings_tbl.Timestamp]
 ratings_tbl["Weekday"] = [getdatetype(row, "weekday") for row in ratings_tbl.Timestamp]
 ratings_tbl["Time"] = [getdatetype(row, "time") for row in ratings_tbl.Timestamp]
+ratings_tbl["Date"] = [getdatetype(row, "date") for row in ratings_tbl.Timestamp]
 movies_tbl["ReleaseYear"] = [int(row[-5:-1]) for row in movies_tbl.Title]
 users_tbl["isFemale"] = [1 if row=="F" else 0 for row in users_tbl.Gender]
+
+#%%
+users_tbl["AgeRange"] = users_tbl.Age
+users_tbl.loc[users_tbl['Age'] ==1, ["AgeRange"]] = "0to17"
+users_tbl.loc[users_tbl['Age'] ==18, ["AgeRange"]] = "18to24"
+users_tbl.loc[users_tbl['Age'] ==25, ["AgeRange"]] = "25to34"
+users_tbl.loc[users_tbl['Age'] ==35, ["AgeRange"]] = "35to44"
+users_tbl.loc[users_tbl['Age'] ==45, ["AgeRange"]] = "45to49"
+users_tbl.loc[users_tbl['Age'] ==50, ["AgeRange"]] = "50to55"
+users_tbl.loc[users_tbl['Age'] ==56, ["AgeRange"]] = "56+"
 
 
 #%%
@@ -71,5 +84,55 @@ fig.write_html("helloworld.html")
 
 #%%
 webbrowser.open('file://'+ os.path.realpath("helloworld.html"))
+
+#%%
+femaleusers = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].AgeRange.value_counts()).sort_index()
+maleusers = pd.DataFrame(users_tbl[users_tbl.Gender=="M"].AgeRange.value_counts()).sort_index()
+#%%
+userages = go.Figure(data=[
+    go.Bar(name='Men', x=maleusers.index, y=maleusers.AgeRange),
+    go.Bar(name='Women', x=femaleusers.index, y=femaleusers.AgeRange)
+])
+# Change the bar mode
+userages.update_layout(barmode='group')
+userages.write_html("userages.html")
+
+#%%
+uniqueusers = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.nunique())
+uniquemovies = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).MovieID.nunique())
+nreviews = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.count())
+avgrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.mean())
+
+#%%
+trace0 = go.Figure(go.Scatter(
+    x=nreviews.index,
+    y=nreviews.UserID)
+)
+
+trace0.add_trace(go.Scatter(
+    x=uniqueusers.index,
+    y=uniqueusers.UserID)
+)
+trace0.add_trace(go.Scatter(
+    x=uniquemovies.index,
+    y=uniquemovies.MovieID)
+)
+
+trace0.write_html("basicCounts.html")
+webbrowser.open('file://'+ os.path.realpath("basicCounts.html"))
+#%%
+
+trace1 = go.Figure(go.Scatter(
+    x=avgrating.index,
+    y=avgrating.Rating)
+)
+trace1.write_html("avgRatingOverTime.html")
+webbrowser.open('file://'+ os.path.realpath("avgRatingOverTime.html"))
+#%%
+nratings = pd.DataFrame(ratings_tbl.groupby("UserID").MovieID.count())
+avgRatingsByPerson = nratings.mean()
+medianRatingsByPerson = nratings.median()
+
+#%%
 
 #%%
