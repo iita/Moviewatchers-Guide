@@ -7,6 +7,8 @@ import requests as rq
 import pandas as pd
 import pgeocode as pg 
 import plotly.graph_objs as go
+import webbrowser
+import os 
 
 #%%
 jtplot.style("monokai")
@@ -64,4 +66,10 @@ fig = go.Figure(data=go.Heatmap(
                    x=cframe.columns.values,
                    y=cframe.index.values))
 fig.show()
+fig.write_html("helloworld.html")
+#%%
+
+#%%
+webbrowser.open('file://'+ os.path.realpath("helloworld.html"))
+
 #%%
