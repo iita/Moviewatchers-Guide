@@ -57,7 +57,9 @@ users_tbl.loc[users_tbl['Age'] ==35, ["AgeRange"]] = "35to44"
 users_tbl.loc[users_tbl['Age'] ==45, ["AgeRange"]] = "45to49"
 users_tbl.loc[users_tbl['Age'] ==50, ["AgeRange"]] = "50to55"
 users_tbl.loc[users_tbl['Age'] ==56, ["AgeRange"]] = "56+"
-
+#%%
+occupation_names={0:  "other or not specified",1:  "academic/educator",2:  "artist",3:  "clerical/admin",4:  "college/grad student",5:  "customer service",6:  "doctor/health care",7:  "executive/managerial",8:  "farmer",9:  "homemaker",10:  "K-12 student",11:  "lawyer",12:  "programmer",13:  "retired",14:  "sales/marketing",15:  "scientist",16:  "self-employed",17:  "technician/engineer",18:  "tradesman/craftsman",19:  "unemployed",20:  "writer",}
+users_tbl["OccupationName"] = [occupation_names.get(row) for row in users_tbl.Occupation]
 
 #%%
 nomi = pg.Nominatim("us")
@@ -223,6 +225,16 @@ movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").he
 
 
 #%%
+femaleoccupations = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].OccupationName.value_counts()).sort_index()
+maleoccupations = pd.DataFrame(users_tbl[users_tbl.Gender=="M"].OccupationName.value_counts()).sort_index()
+useroccupations = go.Figure(data=[
+    go.Bar(name='Men', x=maleoccupations.index, y=maleoccupations.OccupationName),
+    go.Bar(name='Women', x=femaleoccupations.index, y=femaleoccupations.OccupationName)
+])
+# Change the bar mode
+useroccupations.update_layout(barmode='group')
+useroccupations.write_html("useroccupations.html")
+webbrowser.open('file://'+ os.path.realpath("useroccupations.html"))
 
 
 #%%
