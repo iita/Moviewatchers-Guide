@@ -68,8 +68,14 @@ zip_states = {}
 for z in users_tbl.ZipCode:
     if z not in zip_states:
         zip_states[z] = nomi.query_postal_code(z).state_name
+
+zip_statecodes = {}
+for z in users_tbl.ZipCode:
+    if z not in zip_statecodes:
+        zip_statecodes[z] = nomi.query_postal_code(z).state_name
 #%%
 users_tbl["State"] = [zip_states.get(str(row)) for row in users_tbl.ZipCode]
+users_tbl["StateCode"] = [zip_statecodes.get(str(row)) for row in users_tbl.ZipCode]
 #%%
 userstatesF = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].State.value_counts())
 userstatesM = pd.DataFrame(users_tbl[users_tbl.Gender=="M"].State.value_counts())
