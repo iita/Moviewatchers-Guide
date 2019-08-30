@@ -135,31 +135,20 @@ medianRatingsByPerson = nratings.median()
 
 #%%
 genres = ["Action","Adventure","Animation","Children's","Comedy","Crime","Documentary","Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller","War","Western"]
-genre_count={}
+genre_dict={}
 for x in genres:
-    genre_count[x] = movies_tbl[movies_tbl.Genres.str.contains(x)].MovieID.count()
+    genre_dict[x] = {"thisGenre": movies_tbl[movies_tbl.Genres.str.contains(x)].MovieID.count(), "multiGenre":  movies_tbl[movies_tbl.Genres.str.contains(x) & movies_tbl.Genres.str.contains("\|")].MovieID.count() }
 
 #%%
 movies_tbl[movies_tbl.Genres.str.contains(x)].MovieID.count()
 movies_tbl[movies_tbl.Genres.str.contains("\|")].MovieID.count()
-#%%
-multigenre_count={}
-for x in genres:
-    multigenre_count[x] = movies_tbl[movies_tbl.Genres.str.contains(x) & movies_tbl.Genres.str.contains("\|")].MovieID.count()
 
 #%%
-genres_tbl1 = pd.DataFrame.from_dict(data=genre_count, orient="index")
-genres_tbl2 = pd.DataFrame.from_dict(data=multigenre_count, orient="index")
-#%%
-genres_tbl1["Genre"] = genres_tbl1.index
-genres_tbl2["Genre"] = genres_tbl2.index
-genres_tbl = pd.merge(genres_tbl1, genres_tbl2, on="Genre")
-#%%
-genres_tbl.columns = ["includesGenre", "Genre", "multiGenre"]
+genres_tbl = pd.DataFrame.from_dict(data=genre_dict, orient="index")
 #%%
 genresplot = go.Figure(data=[
-    go.Bar(name='thisGenre', x=genres_tbl.Genre, y=genres_tbl.includesGenre),
-    go.Bar(name='multiGenre', x=genres_tbl.Genre, y=genres_tbl.multiGenre)
+    go.Bar(name='thisGenre', x=genres_tbl.index, y=genres_tbl.thisGenre),
+    go.Bar(name='multiGenre', x=genres_tbl.index, y=genres_tbl.multiGenre)
 ])
 
 genresplot.update_layout(barmode='group')
