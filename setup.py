@@ -166,3 +166,55 @@ genresplot.update_layout(barmode='group')
 genresplot.write_html("genresbars.html")
 webbrowser.open('file://'+ os.path.realpath("genresbars.html"))
 #%%
+movies_ratings = {}
+for m in movies_tbl.MovieID:
+    if m not in movies_ratings:
+        movies_ratings[m] = {"title": movies_tbl[movies_tbl.MovieID==m].Title,"nRated": ratings_tbl[(ratings_tbl.MovieID==m)].Rating.count(),"rate5": ratings_tbl[(ratings_tbl.MovieID==m) & (ratings_tbl.Rating==5)].Rating.count(), "rate1": ratings_tbl[(ratings_tbl.MovieID==m) & (ratings_tbl.Rating==1)].Rating.count(), "avgRating": ratings_tbl[ratings_tbl.MovieID==m].Rating.mean(), "medianRating": ratings_tbl[ratings_tbl.MovieID==m].Rating.median(), "stdRating": ratings_tbl[ratings_tbl.MovieID==m].Rating.std()}
+
+#%%
+movieratings_tbl = pd.DataFrame.from_dict(data=movies_ratings, orient="index")
+
+#%%
+sameyear = full_tbl[full_tbl.ReleaseYear==full_tbl.Year]
+#%%
+
+movieratings_tbl.sort_values(by=["stdRating"], ascending=False, na_position="last")
+
+
+#%%
+movieratings_tbl["percentage5"] = movieratings_tbl.rate5/movieratings_tbl.nRated
+movieratings_tbl["percentage1"] = movieratings_tbl.rate1/movieratings_tbl.nRated
+
+#%%
+movieratings_tbl[movieratings_tbl.nRated>1000].sort_values(by=["stdRating"], ascending=False, na_position="last").head(10)
+
+
+#%%
+movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(10)
+#movieratings_tbl[movieratings_tbl.nRated>500].sort_values(by="percentage1", ascending=False, na_position="last").head(10)
+
+#%%
+new_movies_ratings = {}
+for m in sameyear.MovieID:
+    if m not in new_movies_ratings:
+        new_movies_ratings[m] = {"title": movies_tbl[movies_tbl.MovieID==m].Title,"nRated": sameyear[(sameyear.MovieID==m)].Rating.count(),"rate5": sameyear[(sameyear.MovieID==m) & (sameyear.Rating==5)].Rating.count(), "rate1": sameyear[(sameyear.MovieID==m) & (sameyear.Rating==1)].Rating.count(), "avgRating": sameyear[sameyear.MovieID==m].Rating.mean(), "medianRating": sameyear[sameyear.MovieID==m].Rating.median(), "stdRating": sameyear[sameyear.MovieID==m].Rating.std()}
+
+
+#%%
+new_movieratings_tbl = pd.DataFrame.from_dict(data=new_movies_ratings, orient="index")
+
+
+#%%
+ratings_tbl[ratings_tbl.Rating==5].groupby("MovieID").Rating.count()
+
+#%%
+ratings_tbl[ratings_tbl.Rating==5].Rating.count()
+
+#%%
+movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(50).rate5.sum()
+
+
+#%%
+50059/226310
+
+#%%
