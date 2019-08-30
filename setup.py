@@ -68,6 +68,14 @@ for z in users_tbl.ZipCode:
         zip_states[z] = nomi.query_postal_code(z).state_name
 #%%
 users_tbl["State"] = [zip_states.get(str(row)) for row in users_tbl.ZipCode]
+#%%
+userstatesF = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].State.value_counts())
+userstatesM = pd.DataFrame(users_tbl[users_tbl.Gender=="M"].State.value_counts())
+states_bar = go.Figure([go.Bar(name="MaleUsers",x=userstatesM.index, y=userstatesM.State),
+                        go.Bar(name="FemaleUsers",x=userstatesF.index, y=userstatesF.State)]) 
+states_bar.update_layout(barmode='stack')
+states_bar.write_html("userStates.html")
+webbrowser.open('file://'+ os.path.realpath("userStates.html"))
 
 #%%
 full_tbl = pd.merge(pd.merge(movies_tbl[["MovieID", "Genres", "ReleaseYear"]], ratings_tbl[["MovieID", "UserID", "Rating", "Year", "Month", "Day", "Weekday", "Time"]], "inner", on="MovieID"), users_tbl[["UserID", "Age", "isFemale", "Occupation", "State"]], "inner", on="UserID") #let's not look at incomplete data since there's very little of it
@@ -102,18 +110,20 @@ uniqueusers = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.nunique())
 uniquemovies = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).MovieID.nunique())
 nreviews = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.count())
 avgrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.mean())
+medianrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.median())
+stdrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.std())
 
 #%%
-trace0 = go.Figure(go.Scatter(
+trace0 = go.Figure(go.Scatter(name="Number of reviews",
     x=nreviews.index,
     y=nreviews.UserID)
 )
 
-trace0.add_trace(go.Scatter(
+trace0.add_trace(go.Scatter(name="Number of unique users"
     x=uniqueusers.index,
     y=uniqueusers.UserID)
 )
-trace0.add_trace(go.Scatter(
+trace0.add_trace(go.Scatter(name="Number of unique movies"
     x=uniquemovies.index,
     y=uniquemovies.MovieID)
 )
@@ -122,12 +132,21 @@ trace0.write_html("basicCounts.html")
 webbrowser.open('file://'+ os.path.realpath("basicCounts.html"))
 #%%
 
-trace1 = go.Figure(go.Scatter(
+trace1 = go.Figure(go.Scatter(name="Average rating",
     x=avgrating.index,
     y=avgrating.Rating)
 )
-trace1.write_html("avgRatingOverTime.html")
-webbrowser.open('file://'+ os.path.realpath("avgRatingOverTime.html"))
+
+trace1.add_trace(go.Scatter(name="Median rating",
+    x=medianrating.index,
+    y=medianrating.Rating))
+
+
+trace1.add_trace(go.Scatter(name="Standard deviation of rating",
+    x=stdrating.index,
+    y=stdrating.Rating))
+trace1.write_html("RatingOverTime.html")
+webbrowser.open('file://'+ os.path.realpath("RatingOverTime.html"))
 #%%
 nratings = pd.DataFrame(ratings_tbl.groupby("UserID").MovieID.count())
 avgRatingsByPerson = nratings.mean()
@@ -204,6 +223,6 @@ movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").he
 
 
 #%%
-50059/226310
+
 
 #%%
