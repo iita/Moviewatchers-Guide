@@ -72,7 +72,7 @@ for z in users_tbl.ZipCode:
 zip_statecodes = {}
 for z in users_tbl.ZipCode:
     if z not in zip_statecodes:
-        zip_statecodes[z] = nomi.query_postal_code(z).state_name
+        zip_statecodes[z] = nomi.query_postal_code(z).state_code
 #%%
 users_tbl["State"] = [zip_states.get(str(row)) for row in users_tbl.ZipCode]
 users_tbl["StateCode"] = [zip_statecodes.get(str(row)) for row in users_tbl.ZipCode]
@@ -241,6 +241,71 @@ useroccupations = go.Figure(data=[
 useroccupations.update_layout(barmode='group')
 useroccupations.write_html("useroccupations.html")
 webbrowser.open('file://'+ os.path.realpath("useroccupations.html"))
+#%%
+statecounts = pd.DataFrame(users_tbl.StateCode.value_counts())
+statereviews = pd.merge(ratings_tbl[["Rating", "UserID", "Date"]], users_tbl[["UserID", "StateCode"]], on="UserID")
+
+#%%
+
+fig = go.Figure(data=go.Choropleth(
+    locations=statecounts.index, # Spatial coordinates
+    z = statecounts['StateCode'].astype(float), # Data to be color-coded
+    locationmode = 'USA-states', # set of locations match entries in `locations`
+    colorscale = 'Reds',
+    colorbar_title = "Number of people",
+))
+
+fig.update_layout(
+    title_text = 'Total unique users per state',
+    geo_scope='usa', # limite map scope to USA
+)
+
+fig.write_html("userschloropleth.html")
+webbrowser.open('file://'+ os.path.realpath("userschloropleth.html"))
+
+#%%
+
+#%%
+reviewcounts = pd.DataFrame(statereviews.groupby("StateCode").Rating.count())
+
+#%%
+
+fig = go.Figure(data=go.Choropleth(
+    locations=reviewcounts.index, # Spatial coordinates
+    z = reviewcounts['Rating'].astype(float)/1000, # Data to be color-coded
+    locationmode = 'USA-states', # set of locations match entries in `locations`
+    colorscale = 'Reds',
+    colorbar_title = "Thousand reviews",
+))
+
+fig.update_layout(
+    title_text = 'Number of unique reviews per state',
+    geo_scope='usa', # limite map scope to USA
+)
+
+fig.write_html("reviewschloropleth.html")
+webbrowser.open('file://'+ os.path.realpath("reviewschloropleth.html"))
+
+
+#%%
+reviewavg = pd.DataFrame(statereviews.groupby("StateCode").Rating.mean())
+#%%
+
+fig = go.Figure(data=go.Choropleth(
+    locations=reviewavg.index, # Spatial coordinates
+    z = reviewavg['Rating'].astype(float), # Data to be color-coded
+    locationmode = 'USA-states', # set of locations match entries in `locations`
+    colorscale = 'Reds',
+    colorbar_title = "Average rating of reviews",
+))
+
+fig.update_layout(
+    title_text = 'Average reviews per state',
+    geo_scope='usa', # limite map scope to USA
+)
+
+fig.write_html("ratingschloropleth.html")
+webbrowser.open('file://'+ os.path.realpath("ratingschloropleth.html"))
 
 
 #%%
