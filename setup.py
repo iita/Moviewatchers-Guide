@@ -1,4 +1,5 @@
 #%%%
+import jupyter
 from jupyterthemes import jtplot
 from datetime import datetime
 from zipfile import ZipFile
@@ -9,11 +10,12 @@ import pgeocode as pg
 import plotly.graph_objs as go
 import webbrowser
 import os 
-
 #%%
 jtplot.style("monokai")
 #%%
-
+if not os.path.exists("html_files"):
+    os.mkdir("html_files")
+#%%
 d= rq.get("http://files.grouplens.org/datasets/movielens/ml-1m.zip")
 dd = ZipFile(BytesIO(d.content))
 dd.extractall("Documents\\MovieLens1M")
@@ -82,8 +84,9 @@ userstatesM = pd.DataFrame(users_tbl[users_tbl.Gender=="M"].State.value_counts()
 states_bar = go.Figure([go.Bar(name="MaleUsers",x=userstatesM.index, y=userstatesM.State),
                         go.Bar(name="FemaleUsers",x=userstatesF.index, y=userstatesF.State)]) 
 states_bar.update_layout(barmode='stack')
-states_bar.write_html("userStates.html")
-webbrowser.open('file://'+ os.path.realpath("userStates.html"))
+#%%
+states_bar.write_html("html_files/userStates.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/userStates.html"))
 
 #%%
 full_tbl = pd.merge(pd.merge(movies_tbl[["MovieID", "Genres", "ReleaseYear"]], ratings_tbl[["MovieID", "UserID", "Rating", "Year", "Month", "Day", "Weekday", "Time"]], "inner", on="MovieID"), users_tbl[["UserID", "Age", "isFemale", "Occupation", "State"]], "inner", on="UserID") #let's not look at incomplete data since there's very little of it
@@ -99,9 +102,6 @@ fig.write_html("helloworld.html")
 #%%
 
 #%%
-webbrowser.open('file://'+ os.path.realpath("helloworld.html"))
-
-#%%
 femaleusers = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].AgeRange.value_counts()).sort_index()
 maleusers = pd.DataFrame(users_tbl[users_tbl.Gender=="M"].AgeRange.value_counts()).sort_index()
 #%%
@@ -111,7 +111,7 @@ userages = go.Figure(data=[
 ])
 # Change the bar mode
 userages.update_layout(barmode='group')
-userages.write_html("userages.html")
+userages.write_html("html_files/userages.html")
 
 #%%
 uniqueusers = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.nunique())
@@ -127,17 +127,17 @@ trace0 = go.Figure(go.Scatter(name="Number of reviews",
     y=nreviews.UserID)
 )
 
-trace0.add_trace(go.Scatter(name="Number of unique users"
+trace0.add_trace(go.Scatter(name="Number of unique users",
     x=uniqueusers.index,
     y=uniqueusers.UserID)
 )
-trace0.add_trace(go.Scatter(name="Number of unique movies"
+trace0.add_trace(go.Scatter(name="Number of unique movies",
     x=uniquemovies.index,
     y=uniquemovies.MovieID)
 )
 
-trace0.write_html("basicCounts.html")
-webbrowser.open('file://'+ os.path.realpath("basicCounts.html"))
+trace0.write_html("html_files/basicCounts.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/basicCounts.html"))
 #%%
 
 trace1 = go.Figure(go.Scatter(name="Average rating",
@@ -153,8 +153,8 @@ trace1.add_trace(go.Scatter(name="Median rating",
 trace1.add_trace(go.Scatter(name="Standard deviation of rating",
     x=stdrating.index,
     y=stdrating.Rating))
-trace1.write_html("RatingOverTime.html")
-webbrowser.open('file://'+ os.path.realpath("RatingOverTime.html"))
+trace1.write_html("html_files/RatingOverTime.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/RatingOverTime.html"))
 #%%
 nratings = pd.DataFrame(ratings_tbl.groupby("UserID").MovieID.count())
 avgRatingsByPerson = nratings.mean()
@@ -179,8 +179,8 @@ genresplot = go.Figure(data=[
 ])
 
 genresplot.update_layout(barmode='group')
-genresplot.write_html("genresbars.html")
-webbrowser.open('file://'+ os.path.realpath("genresbars.html"))
+genresplot.write_html("html_files/genresbars.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/genresbars.html"))
 #%%
 movies_ratings = {}
 for m in movies_tbl.MovieID:
@@ -239,15 +239,15 @@ useroccupations = go.Figure(data=[
 ])
 # Change the bar mode
 useroccupations.update_layout(barmode='group')
-useroccupations.write_html("useroccupations.html")
-webbrowser.open('file://'+ os.path.realpath("useroccupations.html"))
+useroccupations.write_html("html_files/useroccupations.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/useroccupations.html"))
 #%%
 statecounts = pd.DataFrame(users_tbl.StateCode.value_counts())
 statereviews = pd.merge(ratings_tbl[["Rating", "UserID", "Date"]], users_tbl[["UserID", "StateCode"]], on="UserID")
 
 #%%
 
-fig = go.Figure(data=go.Choropleth(
+fig1 = go.Figure(data=go.Choropleth(
     locations=statecounts.index, # Spatial coordinates
     z = statecounts['StateCode'].astype(float), # Data to be color-coded
     locationmode = 'USA-states', # set of locations match entries in `locations`
@@ -255,22 +255,23 @@ fig = go.Figure(data=go.Choropleth(
     colorbar_title = "Number of people",
 ))
 
-fig.update_layout(
+fig1.update_layout(
     title_text = 'Total unique users per state',
     geo_scope='usa', # limite map scope to USA
 )
 
-fig.write_html("userschloropleth.html")
+fig1.write_html("html_files/userschloropleth.html")
 webbrowser.open('file://'+ os.path.realpath("userschloropleth.html"))
 
 #%%
+reviewstd = pd.DataFrame(statereviews.groupby("StateCode").Rating.std())
 
 #%%
 reviewcounts = pd.DataFrame(statereviews.groupby("StateCode").Rating.count())
 
 #%%
 
-fig = go.Figure(data=go.Choropleth(
+fig2 = go.Figure(data=go.Choropleth(
     locations=reviewcounts.index, # Spatial coordinates
     z = reviewcounts['Rating'].astype(float)/1000, # Data to be color-coded
     locationmode = 'USA-states', # set of locations match entries in `locations`
@@ -278,20 +279,37 @@ fig = go.Figure(data=go.Choropleth(
     colorbar_title = "Thousand reviews",
 ))
 
-fig.update_layout(
+fig2.update_layout(
     title_text = 'Number of unique reviews per state',
     geo_scope='usa', # limite map scope to USA
 )
 
-fig.write_html("reviewschloropleth.html")
-webbrowser.open('file://'+ os.path.realpath("reviewschloropleth.html"))
+fig2.write_html("html_files/reviewschloropleth.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/reviewschloropleth.html"))
+#%%
+
+fig4 = go.Figure(data=go.Choropleth(
+    locations=reviewstd.index, # Spatial coordinates
+    z = reviewstd['Rating'].astype(float), # Data to be color-coded
+    locationmode = 'USA-states', # set of locations match entries in `locations`
+    colorscale = 'Reds',
+    colorbar_title = "Standard deviation of reviews",
+))
+
+fig4.update_layout(
+    title_text = 'Deviation in reviews per state',
+    geo_scope='usa', # limite map scope to USA
+)
+
+fig4.write_html("html_files/ratingsDchloropleth.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/ratingsDchloropleth.html"))
 
 
 #%%
 reviewavg = pd.DataFrame(statereviews.groupby("StateCode").Rating.mean())
 #%%
 
-fig = go.Figure(data=go.Choropleth(
+fig3 = go.Figure(data=go.Choropleth(
     locations=reviewavg.index, # Spatial coordinates
     z = reviewavg['Rating'].astype(float), # Data to be color-coded
     locationmode = 'USA-states', # set of locations match entries in `locations`
@@ -299,13 +317,57 @@ fig = go.Figure(data=go.Choropleth(
     colorbar_title = "Average rating of reviews",
 ))
 
-fig.update_layout(
+fig3.update_layout(
     title_text = 'Average reviews per state',
     geo_scope='usa', # limite map scope to USA
 )
 
-fig.write_html("ratingschloropleth.html")
-webbrowser.open('file://'+ os.path.realpath("ratingschloropleth.html"))
+fig3.write_html("html_files/ratingschloropleth.html")
+webbrowser.open('file://'+ os.path.realpath("html_files/ratingschloropleth.html"))
 
+#%%
+testfileurl = 'file:///'+ os.path.realpath("ratingsDchloropleth.html")
+#%%
+toprate = pd.DataFrame(movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(50))
+
+#%%
+summary_table_1 = toprate
+summary_table_1 = summary_table_1\
+    .to_html()\
+    .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
+#%%
+html_string = '''
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <style>body{ margin:0 100; background:whitesmoke; }</style>
+    </head>
+    <body>
+        <h1>BigCorporation review of historical movie ratings</h1>
+
+        <!-- *** Section 1 *** --->
+        <h2>Section 1: Apple Inc. (AAPL) stock in 2014</h2>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+src="''' + testfileurl + '''"></iframe>
+        <p>Apple stock price rose steadily through 2014.</p>
+        
+        <!-- *** Section 2 *** --->
+        <h2>Section 2: AAPL compared to other 2014 stocks</h2>
+        <iframe width="1000" height="1000" frameborder="0" seamless="seamless" scrolling="no" \
+src="''' + testfileurl + '''"></iframe>
+        <p>GE had the most predictable stock price in 2014. IBM had the highest mean stock price. \
+The red lines are kernel density estimations of each stock price - the peak of each red lines \
+corresponds to its mean stock price for 2014 on the x axis.</p>
+        <h3>Reference table: stock tickers</h3>
+        ''' + summary_table_1 + '''
+        <h3>Summary table: 2014 stock statistics</h3>
+        ''' + testfileurl + '''
+    </body>
+</html>'''
+
+#%%
+f = open('report.html','w')
+f.write(html_string)
+f.close()
 
 #%%

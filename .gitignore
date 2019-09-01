@@ -1,5 +1,7 @@
 #Folders to ignore:
 MovieLens1M/
 .vscode/
+html_files/
+image_files/
 #Filetypes to ignore:
 *.html
