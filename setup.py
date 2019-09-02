@@ -119,22 +119,18 @@ reviewsGraph = go.Figure(go.Scatter(name="Number of reviews",
     y=nreviews.UserID)
 )
 
-usersGraph = go.Figure(go.Scatter(name="Number of unique users",
+add_trace.reviewsGraph(go.Scatter(name="Number of unique users",
     x=uniqueusers.index,
     y=uniqueusers.UserID)
 )
-moviesGraph = go.Figure(go.Scatter(name="Number of unique movies",
+add_trace.reviewsGraphgo.Figure(go.Scatter(name="Number of unique movies",
     x=uniquemovies.index,
     y=uniquemovies.MovieID)
 )
 
 reviewsGraph.write_html("html_files/reviewsGraph.html")
-usersGraph.write_html("html_files/usersGraph.html")
-moviesGraph.write_html("html_files/moviesGraph.html")
 #webbrowser.open('file://'+ os.path.realpath("html_files/basicCounts.html"))
 reviewsG_url = 'file:///'+ os.path.realpath("html_files/reviewsGraph.html")
-usersG_url = 'file:///'+ os.path.realpath("html_files/usersGraph.html")
-moviesG_url = 'file:///'+ os.path.realpath("html_files/moviesGraph.html")
 
 #%%
 
@@ -434,7 +430,7 @@ src="''' + usersmap_url + '''"></iframe>
         </ol>
         <h4>Number of unique active users per day</h4>
         <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
-src="''' + usersG_url + '''"></iframe>
+src="''' + reviewsG_url + '''"></iframe>
         <p>Since most users were active in early 2000, it is important to note that the data may be biased.</p>
         <h4>User base by age and gender</h4>
         <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
@@ -484,6 +480,6 @@ f.write(html_string)
 f.close()
 
 #%%
-
+webbrowser.open('file://'+ os.path.realpath("report.html"))
 
 #%%
