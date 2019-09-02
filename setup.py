@@ -62,7 +62,7 @@ users_tbl.loc[users_tbl['Age'] ==56, ["AgeRange"]] = "56+"
 #%%
 occupation_names={0:  "other or not specified",1:  "academic/educator",2:  "artist",3:  "clerical/admin",4:  "college/grad student",5:  "customer service",6:  "doctor/health care",7:  "executive/managerial",8:  "farmer",9:  "homemaker",10:  "K-12 student",11:  "lawyer",12:  "programmer",13:  "retired",14:  "sales/marketing",15:  "scientist",16:  "self-employed",17:  "technician/engineer",18:  "tradesman/craftsman",19:  "unemployed",20:  "writer",}
 users_tbl["OccupationName"] = [occupation_names.get(row) for row in users_tbl.Occupation]
-
+#%%
 #%%
 nomi = pg.Nominatim("us")
 
@@ -86,20 +86,10 @@ states_bar = go.Figure([go.Bar(name="MaleUsers",x=userstatesM.index, y=userstate
 states_bar.update_layout(barmode='stack')
 #%%
 states_bar.write_html("html_files/userStates.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/userStates.html"))
+#webbrowser.open('file://'+ os.path.realpath("html_files/userStates.html"))
 
 #%%
 full_tbl = pd.merge(pd.merge(movies_tbl[["MovieID", "Genres", "ReleaseYear"]], ratings_tbl[["MovieID", "UserID", "Rating", "Year", "Month", "Day", "Weekday", "Time"]], "inner", on="MovieID"), users_tbl[["UserID", "Age", "isFemale", "Occupation", "State"]], "inner", on="UserID") #let's not look at incomplete data since there's very little of it
-
-#%%
-cframe = full_tbl.corr()
-fig = go.Figure(data=go.Heatmap(
-                   z=cframe.values,
-                   x=cframe.columns.values,
-                   y=cframe.index.values))
-fig.show()
-fig.write_html("helloworld.html")
-#%%
 
 #%%
 femaleusers = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].AgeRange.value_counts()).sort_index()
@@ -112,7 +102,7 @@ userages = go.Figure(data=[
 # Change the bar mode
 userages.update_layout(barmode='group')
 userages.write_html("html_files/userages.html")
-
+ages_url = 'file:///'+ os.path.realpath("html_files/userages.html")
 #%%
 uniqueusers = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.nunique())
 uniquemovies = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).MovieID.nunique())
@@ -120,24 +110,38 @@ nreviews = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).UserID.count())
 avgrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.mean())
 medianrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.median())
 stdrating = pd.DataFrame(ratings_tbl.groupby(by=["Date"]).Rating.std())
+#%%
+n_users = users_tbl.UserID.count()
+n_movies = movies_tbl.MovieID.count()
+n_reviews = pd.merge(ratings_tbl, movies_tbl, "inner", on="MovieID").Rating.count()
+n_reviewsMax = nreviews.UserID.max()
+date_reviewsMax = nreviews[nreviews.UserID==nreviews.UserID.max()].index
 
 #%%
-trace0 = go.Figure(go.Scatter(name="Number of reviews",
+reviewsGraph = go.Figure(go.Scatter(name="Number of reviews",
     x=nreviews.index,
     y=nreviews.UserID)
 )
 
-trace0.add_trace(go.Scatter(name="Number of unique users",
+usersGraph = go.Figure(go.Scatter(name="Number of unique users",
     x=uniqueusers.index,
     y=uniqueusers.UserID)
 )
-trace0.add_trace(go.Scatter(name="Number of unique movies",
+moviesGraph = go.Figure(go.Scatter(name="Number of unique movies",
     x=uniquemovies.index,
     y=uniquemovies.MovieID)
 )
 
-trace0.write_html("html_files/basicCounts.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/basicCounts.html"))
+reviewsGraph.write_html("html_files/reviewsGraph.html")
+usersGraph.write_html("html_files/usersGraph.html")
+moviesGraph.write_html("html_files/moviesGraph.html")
+#webbrowser.open('file://'+ os.path.realpath("html_files/basicCounts.html"))
+reviewsG_url = 'file:///'+ os.path.realpath("html_files/reviewsGraph.html")
+usersG_url = 'file:///'+ os.path.realpath("html_files/usersGraph.html")
+moviesG_url = 'file:///'+ os.path.realpath("html_files/moviesGraph.html")
+
+#%%
+
 #%%
 
 trace1 = go.Figure(go.Scatter(name="Average rating",
@@ -154,7 +158,8 @@ trace1.add_trace(go.Scatter(name="Standard deviation of rating",
     x=stdrating.index,
     y=stdrating.Rating))
 trace1.write_html("html_files/RatingOverTime.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/RatingOverTime.html"))
+#webbrowser.open('file://'+ os.path.realpath("html_files/RatingOverTime.html"))
+ratingsG_url = 'file:///'+ os.path.realpath("html_files/RatingOverTime.html")
 #%%
 nratings = pd.DataFrame(ratings_tbl.groupby("UserID").MovieID.count())
 avgRatingsByPerson = nratings.mean()
@@ -164,7 +169,7 @@ medianRatingsByPerson = nratings.median()
 genres = ["Action","Adventure","Animation","Children's","Comedy","Crime","Documentary","Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller","War","Western"]
 genre_dict={}
 for x in genres:
-    genre_dict[x] = {"thisGenre": movies_tbl[movies_tbl.Genres.str.contains(x)].MovieID.count(), "multiGenre":  movies_tbl[movies_tbl.Genres.str.contains(x) & movies_tbl.Genres.str.contains("\|")].MovieID.count() }
+    genre_dict[x] = {"thisGenre": movies_tbl[movies_tbl.Genres.str.contains(x)].MovieID.count(), "multiGenre":  movies_tbl[movies_tbl.Genres.str.contains(x) & movies_tbl.Genres.str.contains("\|")].MovieID.count(), "nRatings": full_tbl[full_tbl.Genres.str.contains(x)].Rating.count(),"meanRatings": full_tbl[full_tbl.Genres.str.contains(x)].Rating.mean() }
 
 #%%
 movies_tbl[movies_tbl.Genres.str.contains(x)].MovieID.count()
@@ -174,13 +179,21 @@ movies_tbl[movies_tbl.Genres.str.contains("\|")].MovieID.count()
 genres_tbl = pd.DataFrame.from_dict(data=genre_dict, orient="index")
 #%%
 genresplot = go.Figure(data=[
-    go.Bar(name='thisGenre', x=genres_tbl.index, y=genres_tbl.thisGenre),
-    go.Bar(name='multiGenre', x=genres_tbl.index, y=genres_tbl.multiGenre)
+    go.Bar(name='thisGenre', x=genres_tbl.index, y=genres_tbl.thisGenre/n_movies),
+    go.Bar(name='multiGenre', x=genres_tbl.index, y=genres_tbl.multiGenre/n_movies)
+])
+
+genreratingsplot =  go.Figure(data=[
+    go.Bar(name='nRatings', x=genres_tbl.index, y=genres_tbl.nRatings/n_reviews),
+    go.Bar(name='multiGenre', x=genres_tbl.index, y=genres_tbl.meanRatings)
 ])
 
 genresplot.update_layout(barmode='group')
 genresplot.write_html("html_files/genresbars.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/genresbars.html"))
+genreratingssplot.write_html("html_files/genreratingssbars.html")
+#webbrowser.open('file://'+ os.path.realpath("html_files/genresbars.html"))
+genres_url = 'file:///'+ os.path.realpath("html_files/genresbars.html")
+genreratings_url = 'file:///'+ os.path.realpath("html_files/genreratingsbars.html")
 #%%
 movies_ratings = {}
 for m in movies_tbl.MovieID:
@@ -189,7 +202,10 @@ for m in movies_tbl.MovieID:
 
 #%%
 movieratings_tbl = pd.DataFrame.from_dict(data=movies_ratings, orient="index")
-
+#%%
+movieratings_tbl.avgRating
+#%%
+go.Figure(go.Bar(name='MeanRating', x=movieratings_tbl.index, y=movieratings_tbl.avgRating))
 #%%
 sameyear = full_tbl[full_tbl.ReleaseYear==full_tbl.Year]
 #%%
@@ -229,6 +245,34 @@ ratings_tbl[ratings_tbl.Rating==5].Rating.count()
 #%%
 movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(50).rate5.sum()
 
+#%%
+rates = pd.DataFrame(ratings_tbl.Rating.value_counts())
+
+ratingbar = go.Figure(go.Bar(name="Rating",
+    x=rates.index,
+    y=rates.Rating/n_reviews)
+)
+#%%
+newrates = pd.DataFrame(full_tbl[full_tbl.ReleaseYear==full_tbl.Year])
+nnewrates = newrates.Rating.count()
+#%%
+newratingbar = go.Figure(go.Bar(name="Rating",
+    x=pd.DataFrame(newrates.Rating.value_counts()).index,
+    y=pd.DataFrame(newrates.Rating.value_counts()).Rating/nnewrates)
+)
+
+#%%
+ratingsplot = go.Figure(data=[
+    go.Bar(name="All movies",
+    x=rates.index,
+    y=rates.Rating/n_reviews),
+    go.Bar(name="New movies",
+    x=pd.DataFrame(newrates.Rating.value_counts()).index,
+    y=pd.DataFrame(newrates.Rating.value_counts()).Rating/nnewrates)
+])
+
+ratingsplot.update_layout(barmode='group')
+ratingsplot_url = 'file:///'+ os.path.realpath("html_files/ratingsplot.html")
 
 #%%
 femaleoccupations = pd.DataFrame(users_tbl[users_tbl.Gender=="F"].OccupationName.value_counts()).sort_index()
@@ -240,7 +284,8 @@ useroccupations = go.Figure(data=[
 # Change the bar mode
 useroccupations.update_layout(barmode='group')
 useroccupations.write_html("html_files/useroccupations.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/useroccupations.html"))
+#webbrowser.open('file://'+ os.path.realpath("html_files/useroccupations.html"))
+occupations_url = 'file:///'+ os.path.realpath("html_files/useroccupations.html")
 #%%
 statecounts = pd.DataFrame(users_tbl.StateCode.value_counts())
 statereviews = pd.merge(ratings_tbl[["Rating", "UserID", "Date"]], users_tbl[["UserID", "StateCode"]], on="UserID")
@@ -261,8 +306,8 @@ fig1.update_layout(
 )
 
 fig1.write_html("html_files/userschloropleth.html")
-webbrowser.open('file://'+ os.path.realpath("userschloropleth.html"))
-
+#webbrowser.open('file://'+ os.path.realpath("userschloropleth.html"))
+usersmap_url = 'file:///'+ os.path.realpath("userschloropleth.html")
 #%%
 reviewstd = pd.DataFrame(statereviews.groupby("StateCode").Rating.std())
 
@@ -285,7 +330,8 @@ fig2.update_layout(
 )
 
 fig2.write_html("html_files/reviewschloropleth.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/reviewschloropleth.html"))
+#webbrowser.open('file://'+ os.path.realpath("html_files/reviewschloropleth.html"))
+reviews_url = 'file:///'+ os.path.realpath("reviewschloropleth.html")
 #%%
 
 fig4 = go.Figure(data=go.Choropleth(
@@ -302,7 +348,8 @@ fig4.update_layout(
 )
 
 fig4.write_html("html_files/ratingsDchloropleth.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/ratingsDchloropleth.html"))
+#webbrowser.open('file://'+ os.path.realpath("html_files/ratingsDchloropleth.html"))
+ratingsDev_url = 'file:///'+ os.path.realpath("ratingsDchloropleth.html")
 
 
 #%%
@@ -313,7 +360,7 @@ fig3 = go.Figure(data=go.Choropleth(
     locations=reviewavg.index, # Spatial coordinates
     z = reviewavg['Rating'].astype(float), # Data to be color-coded
     locationmode = 'USA-states', # set of locations match entries in `locations`
-    colorscale = 'Reds',
+    colorscale = 'Greens',
     colorbar_title = "Average rating of reviews",
 ))
 
@@ -324,11 +371,10 @@ fig3.update_layout(
 
 fig3.write_html("html_files/ratingschloropleth.html")
 webbrowser.open('file://'+ os.path.realpath("html_files/ratingschloropleth.html"))
-
+ratingsAvg_url = 'file:///'+ os.path.realpath("html_files/ratingschloropleth.html")
 #%%
-testfileurl = 'file:///'+ os.path.realpath("ratingsDchloropleth.html")
 #%%
-toprate = pd.DataFrame(movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(50))
+toprate = pd.DataFrame(movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(10))
 
 #%%
 summary_table_1 = toprate
@@ -336,6 +382,7 @@ summary_table_1 = summary_table_1\
     .to_html()\
     .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
 #%%
+#I swear I looked into it and iframe is really the recommended option, outside of Dash.
 html_string = '''
 <html>
     <head>
@@ -346,22 +393,59 @@ html_string = '''
         <h1>BigCorporation review of historical movie ratings</h1>
 
         <!-- *** Section 1 *** --->
-        <h2>Section 1: Apple Inc. (AAPL) stock in 2014</h2>
+        <h2>Section 1: The Data</h2>
+        <h3>Section 1.1: Basics</h3>
+        <ul>
+            <li>Total number of reviews ''' + str(n_reviews) + '''</li>
+            <li>Total number of users ''' + str(n_users) + '''</li>
+            <li>Total number of movies ''' + str(n_movies) + '''</li>
+        </ul>
+        <h3>Section 1.2: Users</h3>
         <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
-src="''' + testfileurl + '''"></iframe>
-        <p>Apple stock price rose steadily through 2014.</p>
+src="''' + usersmap_url + '''"></iframe>
+        <p>Unsurprisingly, many of the users are from the most populous states.</p>
+        <p>The top 5 most populous states in the US:</p>
+        <ol>
+            <li>California</li>
+            <li>Texas</li>
+            <li>Florida</li>
+            <li>New York</li>
+            <li>Pennsylvania</li>
+        </ol>
+        <h4>Number of unique active users per day</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+src="''' + usersG_url + '''"></iframe>
+        <p>Since most users were active in early 2000, it is important to note that the data may be biased.</p>
+        <h4>User base by age and gender</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+src="''' + ages_url + '''"></iframe>
+        <h4>User base by occupation and gender</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+        src="''' + occupations_url + '''"></iframe>
+        <h3>Section 1.3: Movies</h3>
+        <h4>Movies by genre</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+        src="''' + genres_url + '''"></iframe>
+        <h3>Section 1.4; Ratings</h3>
+        <h4>Distribution of ratings</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+        src="''' + ratingsplot_url + '''"></iframe>
+        <h4>Ratings over time</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+        src="''' + ratingsG_url + '''"></iframe>
         
         <!-- *** Section 2 *** --->
         <h2>Section 2: AAPL compared to other 2014 stocks</h2>
         <iframe width="1000" height="1000" frameborder="0" seamless="seamless" scrolling="no" \
-src="''' + testfileurl + '''"></iframe>
+        src="''' + ratingsAvg_url + '''"></iframe>
         <p>GE had the most predictable stock price in 2014. IBM had the highest mean stock price. \
 The red lines are kernel density estimations of each stock price - the peak of each red lines \
 corresponds to its mean stock price for 2014 on the x axis.</p>
         <h3>Reference table: stock tickers</h3>
         ''' + summary_table_1 + '''
         <h3>Summary table: 2014 stock statistics</h3>
-        ''' + testfileurl + '''
+        ''' + "testfileurl" + '''
+       
     </body>
 </html>'''
 
@@ -369,5 +453,11 @@ corresponds to its mean stock price for 2014 on the x axis.</p>
 f = open('report.html','w')
 f.write(html_string)
 f.close()
+
+#%%
+webbrowser.open('file://'+ os.path.realpath("report.html"))
+#%%
+movies_tbl.head()#%%
+
 
 #%%
