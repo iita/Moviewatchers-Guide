@@ -1,6 +1,4 @@
 #%%%
-import jupyter
-from jupyterthemes import jtplot
 from datetime import datetime
 from zipfile import ZipFile
 from io import BytesIO
@@ -10,8 +8,6 @@ import pgeocode as pg
 import plotly.graph_objs as go
 import webbrowser
 import os 
-#%%
-jtplot.style("monokai")
 #%%
 if not os.path.exists("html_files"):
     os.mkdir("html_files")
@@ -184,13 +180,13 @@ genresplot = go.Figure(data=[
 ])
 
 genreratingsplot =  go.Figure(data=[
-    go.Bar(name='nRatings', x=genres_tbl.index, y=genres_tbl.nRatings/n_reviews),
-    go.Bar(name='multiGenre', x=genres_tbl.index, y=genres_tbl.meanRatings)
+    go.Bar(name='percentage of all ratings', x=genres_tbl.index, y=genres_tbl.nRatings/n_reviews),
+    go.Bar(name='median rating', x=genres_tbl.index, y=genres_tbl.meanRatings)
 ])
 
 genresplot.update_layout(barmode='group')
 genresplot.write_html("html_files/genresbars.html")
-genreratingssplot.write_html("html_files/genreratingssbars.html")
+genreratingsplot.write_html("html_files/genreratingsbars.html")
 #webbrowser.open('file://'+ os.path.realpath("html_files/genresbars.html"))
 genres_url = 'file:///'+ os.path.realpath("html_files/genresbars.html")
 genreratings_url = 'file:///'+ os.path.realpath("html_files/genreratingsbars.html")
@@ -234,7 +230,8 @@ for m in sameyear.MovieID:
 
 #%%
 new_movieratings_tbl = pd.DataFrame.from_dict(data=new_movies_ratings, orient="index")
-
+#%%
+new_movieratings_tbl.head()
 
 #%%
 ratings_tbl[ratings_tbl.Rating==5].groupby("MovieID").Rating.count()
@@ -272,6 +269,7 @@ ratingsplot = go.Figure(data=[
 ])
 
 ratingsplot.update_layout(barmode='group')
+ratingsplot.write_html("html_files/ratingsplot.html")
 ratingsplot_url = 'file:///'+ os.path.realpath("html_files/ratingsplot.html")
 
 #%%
@@ -370,17 +368,39 @@ fig3.update_layout(
 )
 
 fig3.write_html("html_files/ratingschloropleth.html")
-webbrowser.open('file://'+ os.path.realpath("html_files/ratingschloropleth.html"))
+#webbrowser.open('file://'+ os.path.realpath("html_files/ratingschloropleth.html"))
 ratingsAvg_url = 'file:///'+ os.path.realpath("html_files/ratingschloropleth.html")
 #%%
+genreratings_url
 #%%
 toprate = pd.DataFrame(movieratings_tbl.sort_values(by="rate5", ascending=False, na_position="last").head(10))
-
+bottomrate = pd.DataFrame(movieratings_tbl.sort_values(by="rate1", ascending=False, na_position="last").head(10))
 #%%
 summary_table_1 = toprate
 summary_table_1 = summary_table_1\
     .to_html()\
     .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
+    #%%
+summary_table_2 = bottomrate
+summary_table_2 = summary_table_2\
+    .to_html()\
+    .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
+#%%
+summary_table_3 = new_movieratings_tbl.sort_values("nRated").head(10)
+summary_table_3 = summary_table_3\
+    .to_html()\
+    .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
+#%%
+summary_table_4 = new_movieratings_tbl.sort_values("rate5").head(10)
+summary_table_4 = summary_table_4\
+    .to_html()\
+    .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
+#%%
+summary_table_5 = new_movieratings_tbl.sort_values("rate1").head(10)
+summary_table_5 = summary_table_5\
+    .to_html()\
+    .replace('<table border="1" class="dataframe">','<table class="table table-striped">')
+#%%
 #%%
 #I swear I looked into it and iframe is really the recommended option, outside of Dash.
 html_string = '''
@@ -433,18 +453,27 @@ src="''' + ages_url + '''"></iframe>
         <h4>Ratings over time</h4>
         <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
         src="''' + ratingsG_url + '''"></iframe>
-        
-        <!-- *** Section 2 *** --->
-        <h2>Section 2: AAPL compared to other 2014 stocks</h2>
-        <iframe width="1000" height="1000" frameborder="0" seamless="seamless" scrolling="no" \
+        <h4>Ratings based on state</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
         src="''' + ratingsAvg_url + '''"></iframe>
-        <p>GE had the most predictable stock price in 2014. IBM had the highest mean stock price. \
-The red lines are kernel density estimations of each stock price - the peak of each red lines \
-corresponds to its mean stock price for 2014 on the x axis.</p>
-        <h3>Reference table: stock tickers</h3>
+        <h4>Ratings based on genre; distribution across genres and average rating per genre</h4>
+        <iframe width="1000" height="550" frameborder="0" seamless="seamless" scrolling="no" \
+        src="''' + genreratings_url + '''"></iframe>
+        <!-- *** Section 2 *** --->
+        <h2>Section 2: Top movies per category</h2>
+        <h3>Section 2.1: All time</h3>
+        <h4>Top 10 most rated at 5</h4>
         ''' + summary_table_1 + '''
-        <h3>Summary table: 2014 stock statistics</h3>
-        ''' + "testfileurl" + '''
+        <h4>Top 10 most rated at 1</h4>
+        ''' + summary_table_2 + '''
+        <h3>Section 2.2: New movies</h3>
+        <h4>Top 10 most rated new movies</h4>
+        ''' + summary_table_3 + '''
+        <h4>Top 10 most liked new movies</h4>
+        ''' + summary_table_4 + '''
+        <h4>Top 10 most disliked new movies</h4>
+        ''' + summary_table_5 + '''
+        
        
     </body>
 </html>'''
@@ -455,9 +484,6 @@ f.write(html_string)
 f.close()
 
 #%%
-webbrowser.open('file://'+ os.path.realpath("report.html"))
-#%%
-movies_tbl.head()#%%
 
 
 #%%
