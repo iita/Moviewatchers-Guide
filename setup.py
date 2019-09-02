@@ -119,11 +119,11 @@ reviewsGraph = go.Figure(go.Scatter(name="Number of reviews",
     y=nreviews.UserID)
 )
 
-add_trace.reviewsGraph(go.Scatter(name="Number of unique users",
+reviewsGraph.add_trace(go.Scatter(name="Number of unique users",
     x=uniqueusers.index,
     y=uniqueusers.UserID)
 )
-add_trace.reviewsGraphgo.Figure(go.Scatter(name="Number of unique movies",
+reviewsGraph.add_trace(go.Scatter(name="Number of unique movies",
     x=uniquemovies.index,
     y=uniquemovies.MovieID)
 )
