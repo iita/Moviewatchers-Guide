@@ -3,5 +3,6 @@ MovieLens1M/
 .vscode/
 html_files/
 image_files/
+.data/
 #Filetypes to ignore:
 *.html
