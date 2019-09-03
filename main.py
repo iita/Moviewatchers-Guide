@@ -236,19 +236,10 @@ def generate_report(filename: str='report.html', open_browser: bool=False):
 #%%
 # For plotting how many times a rating was given; not really surprising but kinda necessary
     rates = pd.DataFrame(ratings_tbl.Rating.value_counts())
-
-    ratingbar = go.Figure(go.Bar(name="Rating",
-        x=rates.index,
-        y=rates.Rating/n_reviews)
-    )
 #%%
     newrates = pd.DataFrame(full_tbl[full_tbl.ReleaseYear==full_tbl.Year])
     nnewrates = newrates.Rating.count()
-#%%
-    newratingbar = go.Figure(go.Bar(name="Rating",
-        x=pd.DataFrame(newrates.Rating.value_counts()).index,
-        y=pd.DataFrame(newrates.Rating.value_counts()).Rating/nnewrates)
-    )
+
 
 #%%
     ratingsplot = go.Figure(data=[
