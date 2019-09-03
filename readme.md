@@ -1,44 +1,34 @@
-# Moviewatchers Guide
+# Moviewatchers Guide for BigCorporation
 
 ## Introduction
- BigCorporation has streamlined in their quarterly strategic meeting that movie reviews and rankings are super important and valuable data for the corporations plans to take over the world.
+This project exists to showcase generating an interactive report with Python and Plotly.py; the data used is the MovieLens 1M dataset, 
+and the resulting report should not look too out of place in a corporate setting.
 
- You are tasked to present this data to BigCorporations leadership in any formats that you feel are appropriate and provide value.
+## Motivation
+Obviously I am trying to get a job, but this was actually a lot of fun and I hope to continue improving on this in the weeks to come; 
+I would especially like to work on visualisation clarity and coherence in presentation.
 
-## Instructions
+## Technologies
+Main relevant tools are
+- Python 3.7
+- Plotly.py 4.1
+- Pandas 0.25.1
+the rest can be found in requirements.txt
 
-- Make a copy of this repository in your own github account
+## Data choices
+Since it is not clear what BigCorporation's main industry or field is, and since the task as presented only states that the board has decided that movie reviews are important,
+it seems like the first task should be to have a good overview of the basic shape of the data, to know what further insights could be gleaned from it.
+The graphs are meant to be very self explanatory; to drive further research questions or to give an indication where to dwelve deeper.
+Since corporations are most likely interested in consumers, a lot of space is devoted to describing the user base, and their preferences;
+less on the movies themselves.
+After the basic dataset description, the report includes five reference tables for the top ten most liked/disliked movies - because everyone loves a crowd pleaser.
+This is also a fruitful start for further analysis, because one could see whose reviews are pushing the top movies to the top (for example - the majority of reviewers are male,
+so one of the top ten being there mostly through ratings from women would be a great insight, especially if BigCorporation is looking to increase its female consumer base). 
+Unfortunately, the time allotted for this project, and the time I could spend on it this week, do not support very in depth analysis.
 
-- Download the dataset mentioned below
+## Generating the report
+Requires python 3.x and libraries specified in `requirements.txt`, which can be installed with:
+```pip install -r requirements.txt```
 
-- Create a repository in github.
-
-- Create the reports with Python
-
-- Make changes, commit them, and push them in your own repository.
-
-- Send us the url where to find the code.
-
-## Submission
-
-Submit the following items into your repository:
-- Readme.md
-   - Your submission should contain a readme explaining your choices of selected metrics and technical details.
-
-- requirements.txt
-  - Your dependencies should be provided in pip requirements format.
-
-- *.py
-  - Sumbit your code for generating said reports, metrics and insights.
-
-***Please note the usage license of the data and DO NOT upload the data and DO NOT upload the reports with your submission.***
-
-***The reports must be re-generateable from you code!***
-
-## About the data
-
-This exercise uses the MovieLens 1M Dataset.
-
-You can find the data from 
-https://grouplens.org/datasets/movielens/1m/
-
+Report is created by executing:
+```python main.py```
