@@ -14,7 +14,7 @@ import os
 BASEPATH = os.path.abspath('')
 DATADIR = os.path.join(BASEPATH, '.data')
 
-REPORTDIR = os.path.join(BASEPATH, 'reports')
+REPORTDIR = os.path.join(BASEPATH, 'html_files')
 
 # For extracting useful dates from epoch
 def getdatetype(x, datetype):
@@ -352,7 +352,7 @@ def generate_report(filename: str='report.html', open_browser: bool=False):
 
     fig1.write_html("html_files/userschloropleth.html")
     #webbrowser.open('file://'+ os.path.realpath("userschloropleth.html"))
-    usersmap_url = 'file:///'+ os.path.realpath("userschloropleth.html")
+    usersmap_url = 'file:///'+ os.path.realpath("html_files/userschloropleth.html")
     #%%
     # Did not end up using any of this so commenting out for performance; might be interesting later
     #    reviewstd = pd.DataFrame(statereviews.groupby("StateCode").Rating.std())
