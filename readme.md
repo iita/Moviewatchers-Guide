@@ -5,8 +5,7 @@ This project exists to showcase generating an interactive report with Python and
 and the resulting report should not look too out of place in a corporate setting.
 
 ## Motivation
-Obviously I am trying to get a job, but this was actually a lot of fun and I hope to continue improving on this in the weeks to come; 
-I would especially like to work on visualisation clarity and coherence in presentation.
+Obviously I made this as a part of a job application process.
 
 ## Technologies
 Main relevant tools are
